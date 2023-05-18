@@ -9,9 +9,6 @@ const port = 5000;
 app.use(cors())
 app.use(express.json())
 
-app.get('/', (req, res) => {
-  res.send('Welcome to ToyGalaxyHub')
-})
 
 // mongodb.connect
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.l8zs6j6.mongodb.net/?retryWrites=true&w=majority`;
@@ -29,6 +26,21 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    const toysCollection = client.db('ToyGalaxy').collection('Toys');
+
+    app.get('/', (req, res) => {
+      res.send('Welcome to ToyGalaxyHub')
+    })
+
+    // add a toy
+    app.post('/toys', async(req, res) => {
+      const toy = req.body;
+      const result = await toysCollection.insertOne(toy);
+      res.send(result);
+    })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
