@@ -28,14 +28,23 @@ async function run() {
     // await client.connect();
 
     const toysCollection = client.db('ToyGalaxy').collection('Toys');
+    // craete index for searching
+    const result = await toysCollection.createIndex({ name: 1}, {name: "toyIndex"})
 
+    // search by name
+    app.get("/getToyByName/:text", async (req, res) => {
+      const searchText = req.params.text;
+      const result = await toysCollection.find({ name: { $regex: searchText, $options: "i" } }).toArray();
+      res.send(result);
+    });
+    
     app.get('/', (req, res) => {
       res.send('Welcome to ToyGalaxyHub')
     })
 
     // get all toys
     app.get('/toys', async (req, res) => {
-      const result = await toysCollection.find().toArray();
+      const result = await toysCollection.find().limit(20).toArray();
       res.send(result);
     })
 
