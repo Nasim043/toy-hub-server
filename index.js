@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const port = 5000;
 
@@ -33,10 +33,50 @@ async function run() {
       res.send('Welcome to ToyGalaxyHub')
     })
 
+    // get all toys
+    app.get('/toys', async (req, res) => {
+      const result = await toysCollection.find().toArray();
+      res.send(result);
+    })
+
     // add a toy
-    app.post('/toys', async(req, res) => {
+    app.post('/toys', async (req, res) => {
       const toy = req.body;
       const result = await toysCollection.insertOne(toy);
+      res.send(result);
+    })
+
+
+    // get a single toy
+    app.get('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await toysCollection.findOne(query);
+      res.send(result);
+    });
+
+    // delete a toy
+    app.delete('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await toysCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // update a toy
+    app.patch('/toys/:id', async (req, res) => {
+      const id = req.params.id;
+      const newToy = req.body;
+
+      filter = { _id: new ObjectId(id) };
+      options = { upsert: true };
+      updatedToy = {
+        $set:{
+          ...newToy
+        }
+      }
+
+      const result = await toysCollection.updateOne(filter, updatedToy, options);
       res.send(result);
     })
 
