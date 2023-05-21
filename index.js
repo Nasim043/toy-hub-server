@@ -105,7 +105,13 @@ async function run() {
 
     // popular toy
     app.get('/getPopularToys', async (req, res) => {
-      const result = await toysCollection.find().sort({ createdAt: -1 }).limit(3).toArray();
+      const result = await toysCollection.find().sort({ createdAt: 1 }).limit(3).toArray();
+      res.send(result);
+    })
+
+    // recommend toy
+    app.get('/getRecommendedToys', async (req, res) => {
+      const result = await toysCollection.find().sort({ createdAt: -1 }).skip(3).limit(3).toArray();
       res.send(result);
     })
 
