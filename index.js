@@ -29,7 +29,7 @@ async function run() {
 
     const toysCollection = client.db('ToyGalaxy').collection('Toys');
     // craete index for searching
-    const result = await toysCollection.createIndex({ name: 1}, {name: "toyIndex"})
+    const result = await toysCollection.createIndex({ name: 1 }, { name: "toyIndex" })
 
     // search by name
     app.get("/getToyByName/:text", async (req, res) => {
@@ -37,7 +37,7 @@ async function run() {
       const result = await toysCollection.find({ name: { $regex: searchText, $options: "i" } }).toArray();
       res.send(result);
     });
-    
+
     app.get('/', (req, res) => {
       res.send('Welcome to ToyGalaxyHub')
     })
@@ -51,7 +51,7 @@ async function run() {
     // add a toy
     app.post('/toys', async (req, res) => {
       const toy = req.body;
-      const result = await toysCollection.insertOne(toy);
+      const result = await toysCollection.insertOne({ ...toy, createdAt: new Date() });
       res.send(result);
     })
 
@@ -80,8 +80,8 @@ async function run() {
       filter = { _id: new ObjectId(id) };
       options = { upsert: true };
       updatedToy = {
-        $set:{
-          ...newToy
+        $set: {
+          ...newToy,
         }
       }
 
@@ -89,6 +89,34 @@ async function run() {
       res.send(result);
     })
 
+    // filter by email
+    app.get('/getToysByEmail/:email', async (req, res) => {
+      const query = { sellerEmail: req.params.email };
+      const result = await toysCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // filter by subcategory
+    app.get('/getToysByCategory/:subcategory', async (req, res) => {
+      const query = { subcategory: req.params.subcategory };
+      const result = await toysCollection.find(query).limit(2).toArray();
+      res.send(result);
+    })
+
+    // popular toy
+    app.get('/getPopularToys', async (req, res) => {
+      const result = await toysCollection.find().sort({ createdAt: -1 }).limit(3).toArray();
+      res.send(result);
+    })
+
+    // sorting by price
+    app.get('/getSortedToysByEmail/:email', async (req, res) => {
+      const query = { sellerEmail: req.params.email };
+      console.log(req.query);
+      const sort = req.query.sortBy === 'true' ? 1 : -1;
+      const result = await toysCollection.find(query).sort({ price: sort }).collation({ locale: "en_US", numericOrdering: true }).toArray();
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
