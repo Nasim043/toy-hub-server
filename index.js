@@ -29,7 +29,7 @@ async function run() {
 
     const toysCollection = client.db('ToyGalaxy').collection('Toys');
     // craete index for searching
-    const result = await toysCollection.createIndex({ name: 1 }, { name: "toyIndex" })
+    // const result = await toysCollection.createIndex({ name: 1 }, { name: "toyIndex" })
 
     // search by name
     app.get("/getToyByName/:text", async (req, res) => {
@@ -105,13 +105,13 @@ async function run() {
 
     // popular toy
     app.get('/getPopularToys', async (req, res) => {
-      const result = await toysCollection.find().sort({ createdAt: 1 }).limit(3).toArray();
+      const result = await toysCollection.find().sort({ createdAt: 1 }).limit(4).toArray();
       res.send(result);
     })
 
     // recommend toy
     app.get('/getRecommendedToys', async (req, res) => {
-      const result = await toysCollection.find().sort({ createdAt: -1 }).skip(3).limit(3).toArray();
+      const result = await toysCollection.find().sort({ createdAt: -1 }).skip(3).limit(4).toArray();
       res.send(result);
     })
 
